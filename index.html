@@ -1,0 +1,435 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Uli Consulting provides top-tier IT and technology services to help partners grow.">
+    <title>Uli Consulting - IT & Technology Services</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <style>
+        /* Existing CSS from provided document (unchanged) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth; /* Added for smooth scrolling */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: #1a3c5e;
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Space between logo and text */
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links li a:hover {
+            color: #f4a261;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1200x600');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 2rem;
+            background: #f4a261;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #e76f51;
+        }
+
+        .services {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .services h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-item {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 5px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .service-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats {
+            background: #1a3c5e;
+            color: #fff;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-item h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .team {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .team h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .team blockquote {
+            font-style: italic;
+            max-width: 800px;
+            margin: 0 auto 1rem;
+            color: #555;
+        }
+
+        .team cite {
+            font-weight: 700;
+            color: #1a3c5e;
+        }
+
+        .contact {
+            background: #f9f9f9;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-item address {
+            font-style: normal;
+            color: #333;
+        }
+
+        .contact-item a {
+            color: #f4a261;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .contact-item a:hover {
+            color: #e76f51;
+        }
+
+        footer {
+            background: #1a3c5e;
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+
+        /* Existing logo CSS (unchanged) */
+        .logo-img {
+            width: 40px; /* Scale down 500x500 logo */
+            height: 40px;
+            object-fit: contain; /* Maintain aspect ratio */
+            transition: transform 0.3s ease; /* Hover effect */
+            image-rendering: auto; /* Ensure crisp rendering */
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05); /* Subtle hover effect */
+        }
+
+        @media (max-width: 768px) {
+            .logo-img {
+                width: 32px; /* Smaller logo on mobile */
+                height: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-img {
+                width: 28px; /* Even smaller for very small screens */
+                height: 28px;
+            }
+        }
+
+        /* New CSS for mission and values sections */
+        .mission, .values {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .mission h2, .values h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .mission p, .values p {
+            max-width: 800px;
+            margin: 0 auto;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img class="logo-img" src="logo.png" alt="Uli Consulting Logo">
+                Uli Consulting
+            </div>
+            <ul class="nav-links">
+                <li><a href="#mission">Mission</a></li>
+                <li><a href="#values">Values</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><a href="#contacts">Contacts</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Welcome to Uli Consulting</h1>
+        <p>We help our partners grow by providing cutting-edge Information and Technology services.</p>
+        <a href="#contacts" class="cta-button">Get in Touch</a>
+    </section>
+
+    <section id="mission" class="mission">
+        <h2>Our Mission</h2>
+        <p>At Uli Consulting, our mission is to empower our partners to achieve sustainable growth through innovative IT solutions, exceptional service, and a commitment to excellence.</p>
+    </section>
+
+    <section id="values" class="values">
+        <h2>Our Values</h2>
+        <p>We are driven by innovation, integrity, and collaboration, ensuring we deliver transformative solutions while fostering trust and teamwork with our clients and employees.</p>
+    </section>
+
+    <section id="services" class="services">
+        <h2>Our Services</h2>
+        <div class="services-grid">
+            <div class="service-item">
+                <h3>Nearshore Services</h3>
+                <p>High-quality IT solutions delivered remotely with efficiency.</p>
+            </div>
+            <div class="service-item">
+                <h3>Outsourcing, TM & Project Development</h3>
+                <p>Comprehensive project management and development services.</p>
+            </div>
+            <div class="service-item">
+                <h3>Service and Service Management</h3>
+                <p>Streamlined IT service management for optimal performance.</p>
+            </div>
+            <div class="service-item">
+                <h3>Tech Academies</h3>
+                <p>Training programs to empower your team with the latest skills.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>40</h3>
+                <p>Happy Clients</p>
+            </div>
+            <div class="stat-item">
+                <h3>200</h3>
+                <p>Happy Employees</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="team">
+        <h2>What Our Team Says</h2>
+        <blockquote>
+            "For me, it is a great privilege to have been with Uli since its beginning, watching it grow and its first achievements. Despite the natural uncertainty in joining a newly born company, everyone's accessibility, transparency, and professionalism gave me the confidence needed to accept the challenge, and today I am so glad I did it. Being part of this excellent team is an honor, and I am grateful for all the learning and experiences Uli has provided me."
+        </blockquote>
+        <cite>Consultant at Telecommunications Sector</cite>
+    </section>
+
+    <section id="contacts" class="contact">
+        <h2>Contact Us</h2>
+        <div class="contact-grid">
+            <div class="contact-item">
+                <h3>Lisbon</h3>
+                <address>
+                    Avenida Dom João II, Nº46 6A<br>
+                    1990-095 Lisboa
+                </address>
+            </div>
+            <div class="contact-item">
+                <h3>Porto</h3>
+                <address>
+                    Alter Solutions Portugal<br>
+                    Rua Ricardo Severo, nº 3 5º<br>
+                    Vila Nova de Gaia<br>
+                    4050-515 Porto
+                </address>
+            </div>
+            <div class="contact-item">
+                <h3>Madrid</h3>
+                <address>
+                    Paseo de la Castellana, 69 – 5ª planta<br>
+                    26046 Madrid
+                </address>
+            </div>
+            <div class="contact-item">
+                <h3>Luanda</h3>
+                <address>
+                    Edifício Kimpa Vita No.5<br>
+                    Via A4A, Luanda
+                </address>
+            </div>
+            <div class="contact-item">
+                <h3>Email</h3>
+                <p><a href="mailto:info@uliconsulting.pt">info@uliconsulting.pt</a></p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 Uli Consulting. All rights reserved.</p>
+    </footer>
+</body>
+</html>
